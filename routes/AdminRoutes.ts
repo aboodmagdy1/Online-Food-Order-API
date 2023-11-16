@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/vandor", CreateVandor);
 router.get('/vandors',GetVandors)
-router.get('/vandors/:id',GetVandorById)
+router.get('/vandor/:id',GetVandorById)
 
 
 router.get("/", (req: Request, res: Response, next: NextFunction) => {
