@@ -2,7 +2,7 @@ import mongoose, { Schema, Model, Document } from "mongoose";
 // the Vandor is like a resturant that provide services to the users
 // interface IVandor extends Document
 // دا شكل الدوك الي مستنيه يبقي في الموديل بتاعي
-interface IVandor extends Document {
+interface VandorDoc extends Document {
   name: string;
   ownerName: string;
   foodType: [string];
@@ -12,7 +12,7 @@ interface IVandor extends Document {
   email: string;
   password: string;
   salt: string;
-  //   foods: any;
+    foods: any;
   rating: number;
   coverImages: [string];
   serviceAvailable: boolean;
@@ -33,7 +33,7 @@ const VandorSchema = new Schema(
     serviceAvailable: { type: Boolean },
     coverImages: [{ type: String, required: true }],
     rating: { type: Number },
-    // foods: [{ type: mongoose.Types.ObjectId, ref: "Food" }],
+    foods: [{ type: mongoose.Types.ObjectId, ref: "Food" }],
   },
   {
     toJSON: {
@@ -51,6 +51,6 @@ const VandorSchema = new Schema(
 );
 
 // دا شكل الي مستنيه يبقي في الموديل بتاعي
-const VandorModel = mongoose.model<IVandor>("Vandor", VandorSchema);
+const VandorModel = mongoose.model<VandorDoc>("Vandor", VandorSchema);
 
 export { VandorModel as Vandor };
