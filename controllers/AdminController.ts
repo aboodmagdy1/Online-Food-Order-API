@@ -1,24 +1,24 @@
 import { Request, Response, NextFunction } from "express";
-import { CreateVandorInput } from "../dto";
-import { Vandor } from "../models";
+import { CreateVendorInput } from "../dto";
+import { Vendor } from "../models";
 import { GenerateSalt, GeneratePassword } from "../utility";
 
-// as a vactor to find vandor with email or id in different cases 
-export const FindVandor = async (id:string | undefined ,email?:string)=>{
+// as a vactor to find Vendor with email or id in different cases 
+export const FindVendor = async (id:string | undefined ,email?:string)=>{
   if(email){
     // when we try to create a new one 
-    return await Vandor.findOne({email:email})
+    return await Vendor.findOne({email:email})
   }else{
-    // when we try to find a vandor by id
-    return await Vandor.findById(id)
+    // when we try to find a Vendor by id
+    return await Vendor.findById(id)
   }
 
 }
 
-//@desc admin create new vandor
-//@route POST /admin/vandor
+//@desc admin create new Vendor
+//@route POST /admin/Vendor
 //@access private (admin only)
-export const CreateVandor = async (
+export const CreateVendor = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -32,12 +32,12 @@ export const CreateVandor = async (
     password,
     phone,
     address,
-  } = <CreateVandorInput>req.body;
+  } = <CreateVendorInput>req.body;
 
-  const existingVandor =  await FindVandor('',email)
+  const existingVendor =  await FindVendor('',email)
 
-  if (existingVandor !== null) {
-    res.json({ message: "Vandor is exist already with this email " });
+  if (existingVendor !== null) {
+    res.json({ message: "Vendor is exist already with this email " });
   }
 
   //generate salt
@@ -46,7 +46,7 @@ export const CreateVandor = async (
   //encrypt password
   const userPassword = await GeneratePassword(password, salt);
 
-  const createdVandor = await Vandor.create({
+  const createdVendor = await Vendor.create({
     name,
     address,
     pincode,
@@ -61,44 +61,44 @@ export const CreateVandor = async (
     coverImages: [],
     foods:[]
   });
-  res.json(createdVandor);
+  res.json(createdVendor);
 };
 
 
-//@desc admin get all vandors
-//@route GET /admin/vandors
+//@desc admin get all Vendors
+//@route GET /admin/vendors
 //@access private (admin only)
-export const GetVandors = async (
+export const GetVendors = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const Vandors = await Vandor.find({});
+  const Vendors = await Vendor.find({});
 
-  if (Vandors !== null) {
-    return res.json(Vandors);
+  if (Vendors !== null) {
+    return res.json(Vendors);
   }
 
-  return res.json({ message: "Vandors data not available" });
+  return res.json({ message: "Vendors data not available" });
 };
 
-//@desc admin get  vandor
-//@route GET /admin/vandor/:id
+//@desc admin get  vendor
+//@route GET /admin/vendor/:id
 //@access private (admin only)
-export const GetVandorById =async  (
+export const GetVendorById =async  (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const VandorId = req.params.id;
+  const VendorId = req.params.id;
 
-  const vandor = await FindVandor(VandorId)
+  const vendor = await FindVendor(VendorId)
 
-  if (vandor !== null) {
-    return res.json(vandor);
+  if (vendor !== null) {
+    return res.json(vendor);
   }
 
-  return res.json({ message: "vandor data not available" });
+  return res.json({ message: "vendor data not available" });
 
 
 

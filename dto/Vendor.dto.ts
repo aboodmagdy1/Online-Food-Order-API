@@ -1,4 +1,4 @@
-export interface CreateVandorInput{
+export interface CreateVendorInput{
     name : string;
     ownerName : string;
     foodType: [string];
@@ -11,12 +11,12 @@ export interface CreateVandorInput{
 
 }
 
-export interface VandorLoginInputs{
+export interface VendorLoginInputs{
     email: string;
     password: string;
 
 }
-export interface EditVandorInputs{
+export interface EditVendorInputs{
     name : string;
     address: string;
     phone :string;
@@ -25,7 +25,7 @@ export interface EditVandorInputs{
 }
 
 
-export interface VandorPayload {
+export interface VendorPayload {
     _id : string;
     name :string ;
     email: string;

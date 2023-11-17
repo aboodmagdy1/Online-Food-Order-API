@@ -2,7 +2,7 @@ import mongoose, { Schema, Model, Document } from "mongoose";
 
 
 export interface FoodDoc extends Document{
-    vandorId :string;
+    vendorId :string;
     name : string;
     description : string;
     category : string;
@@ -15,15 +15,14 @@ export interface FoodDoc extends Document{
 
 }
 
-
 const FoodSchema = new Schema({
-    vandorId :{type : String},
-    name :{type : String, required: true },
-    description : {type : String , required: true},
-    category :{type : String},
-    foodType : {type : String, required: true},
+    vendorId :{type : String, required : true},
+    name :{type : String , required : true},
+    description : {type : String , required : true},
+    category :{type : String },
+    foodType : {type : String , required : true},
     readyTime : {type : Number},
-    price : {type : Number , required: true},
+    price : {type : Number},
     rating:{type : Number},
     images:{type : [String]}
 },{

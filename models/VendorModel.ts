@@ -1,8 +1,8 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
-// the Vandor is like a resturant that provide services to the users
-// interface IVandor extends Document
+// the Vendor is like a resturant that provide services to the users
+// interface IVendor extends Document
 // دا شكل الدوك الي مستنيه يبقي في الموديل بتاعي
-interface VandorDoc extends Document {
+interface VendorDoc extends Document {
   name: string;
   ownerName: string;
   foodType: [string];
@@ -19,7 +19,7 @@ interface VandorDoc extends Document {
 }
 
 // string وليس String  لاحظ هنا ال
-const VandorSchema = new Schema(
+const VendorSchema = new Schema(
   {
     name: { type: String, required: true },
     ownerName: { type: String, required: true },
@@ -51,6 +51,6 @@ const VandorSchema = new Schema(
 );
 
 // دا شكل الي مستنيه يبقي في الموديل بتاعي
-const VandorModel = mongoose.model<VandorDoc>("Vandor", VandorSchema);
+const VendorModel = mongoose.model<VendorDoc>("Vendor", VendorSchema);
 
-export { VandorModel as Vandor };
+export { VendorModel as Vendor };
