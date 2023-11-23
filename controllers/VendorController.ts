@@ -50,7 +50,6 @@ export const GetVendorProfile = async (
   const user = req.user;
 
   if (user) {
-    console.log(user);
     const existingVendor = await FindVendor(user._id);
     return res.json(existingVendor);
   }
@@ -88,15 +87,19 @@ export const UpdateVendorProfile = async (
 //@desc  update vendor Cover Images
 //@route PATCH /vendor/coverImage
 //@access private(vendor only)
-export const UpdateVendorCoverImages = async(req: Request, res: Response, next: NextFunction) => {
+export const UpdateVendorCoverImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const user = req.user;
   if (user) {
     const vendor = await FindVendor(user._id);
-     const files = req.files as [Express.Multer.File]
-     const images = files.map((file: Express.Multer.File) => file.filename);
-    
+    const files = req.files as [Express.Multer.File];
+    const images = files.map((file: Express.Multer.File) => file.filename);
+
     if (vendor !== null) {
-      vendor.coverImages.push(...images) 
+      vendor.coverImages.push(...images);
 
       const result = await vendor.save();
       return res.json(result);
@@ -104,8 +107,7 @@ export const UpdateVendorCoverImages = async(req: Request, res: Response, next: 
 
     return res.json({ message: "Error Adding Fodd" });
   }
-}
-
+};
 
 //@desc  update vendor services availabel or not
 //@route PATCH /vendor/services
@@ -140,12 +142,12 @@ export const AddFood = async (
   const { name, price, foodType, readyTime, description, category } = <CreateFoodInputs>req.body;
   if (user) {
     const vendor = await FindVendor(user._id);
-     const files = req.files as [Express.Multer.File]
-     const images = files.map((file: Express.Multer.File) => file.filename);
-    
+    const files = req.files as [Express.Multer.File];
+    const images = files.map((file: Express.Multer.File) => file.filename);
+
     if (vendor !== null) {
       const food = await Food.create({
-        vendor: vendor._id,
+        vendorId: vendor._id,
         name: name,
         description: description,
         foodType: foodType,
