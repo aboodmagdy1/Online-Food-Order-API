@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import { plainToClass } from "class-transformer";
-import { CreateCustomerInputs } from "../dto/Customer.dto";
+import { CreateCustomerInputs, CustomerLoginInputs, EditCustomerProfileInputs } from "../dto/Customer.dto";
 import { validate } from "class-validator";
 import {
   GenerateSalt,
@@ -8,6 +8,7 @@ import {
   GenerateOtp,
   onRequestOTP,
   GenerateSignature,
+  validatePassword,
 } from "../utility";
 import { Customer } from "../models";
 
@@ -128,18 +129,75 @@ export const CustomerLogin = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+
+  const loginInputs = plainToClass(CustomerLoginInputs,req.body)  //  لي بحوله اصلا عشان الفاليديت علي الكلاس دا  بدل البودي
+  const inputErrors = await validate(loginInputs,{validationError:{target:true}})
+  
+  if(inputErrors.length >0){
+    return res.status(400).json(inputErrors);
+  }
+
+  const {email, password} = loginInputs
+  const customer = await Customer.findOne({email:email})
+
+  if(customer){
+    const validation = await validatePassword(password,customer.password,customer.salt)
+
+    if(validation){
+      const signature = GenerateSignature({
+        _id: customer._id,
+        email: customer.email,
+        verified: customer.verified,
+      });
+
+
+      return res.status(201).json({
+        token: signature,
+        verified: customer.verified,
+        email: customer.email,
+      });
+    }
+  }
+  return res.status(404).json({ message: "Login error " });
+
+};
 
 
 
-//@desc  request otp
+//@desc  request otp (the same idea of resend the otp )
 //@route Get /customer/otp
 //@access  protected
 export const RequestOtp = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+
+  const customer = req.user 
+
+  if(customer){
+    const profile = await Customer.findById(customer._id)
+
+    if(profile){
+
+
+      const {otp,expiry} = GenerateOtp()
+      profile.otp = otp
+      profile.otp_expiry = expiry
+
+      await profile.save()
+      await onRequestOTP(otp,profile.phone)
+
+      return res.status(200).json({message:"OTP sent your registerd phone number"})
+    }
+
+
+  }
+
+  return res.status(400).json({message:"Error with Request otp"})
+
+};
 
 
 //@desc Get customer profile
@@ -149,7 +207,20 @@ export const GetCustomerProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+
+  const customer = req.user
+
+  if(customer){
+    const profile = await Customer.findById(customer._id)
+
+    if(profile){
+      return res.status(200).json(profile)
+    }
+  }
+
+  return res.status(400).json({message:"Error with get profile"})
+};
 
 
 //@desc Update customer profile
@@ -159,4 +230,30 @@ export const UpdateCustomerProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+
+
+  const customer = req.user
+  const profileInputs = plainToClass(EditCustomerProfileInputs, req.body)
+  const profileErrors = await validate(profileInputs,{validationError:{target:true}})
+
+  if(profileErrors.length >0){
+    return res.status(400).json(profileErrors)
+  }
+  const {fristName,lastName,address} = profileInputs
+  if(customer){
+    const profile = await Customer.findById(customer._id)
+
+    if(profile){
+
+      profile.fristName = fristName
+      profile.lastName = lastName
+      profile.address = address
+
+      const result = await profile.save()
+      return res.status(200).json(result)
+    }
+  }
+
+  return res.status(400).json({message:"Error with Update profile"})
+};
