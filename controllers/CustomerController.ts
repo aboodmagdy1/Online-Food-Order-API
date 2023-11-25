@@ -1,6 +1,11 @@
 import express, { Request, Response, NextFunction } from "express";
 import { plainToClass } from "class-transformer";
-import { CreateCustomerInputs, CustomerLoginInputs, EditCustomerProfileInputs } from "../dto/Customer.dto";
+import {
+  CreateCustomerInputs,
+  CustomerLoginInputs,
+  EditCustomerProfileInputs,
+  OrderInputs,
+} from "../dto";
 import { validate } from "class-validator";
 import {
   GenerateSalt,
@@ -10,9 +15,9 @@ import {
   GenerateSignature,
   validatePassword,
 } from "../utility";
-import { Customer } from "../models";
-
-
+import { Customer, Food } from "../models";
+import { Order } from "../models/OrderModel";
+import { profile } from "console";
 
 //@desc  Singup
 //@route POST /customer/signup
@@ -58,6 +63,7 @@ export const CustomerSignup = async (
     lastName: "",
     lng: 0,
     lat: 0,
+    orders: [],
   });
 
   if (result) {
@@ -80,7 +86,6 @@ export const CustomerSignup = async (
 
   return res.status(400).json({ message: "Errro with signup" });
 };
-
 
 //@desc  verify customer phone number after he recived otp
 //@route Patch /customer/verify
@@ -108,7 +113,6 @@ export const CustomerVerify = async (
           verified: updatedCustomerResponse.verified,
         });
 
-
         return res.status(200).json({
           token: signature,
           verified: updatedCustomerResponse.verified,
@@ -118,39 +122,41 @@ export const CustomerVerify = async (
     }
   }
   return res.status(400).json({ message: "Errro with OTP validation" });
-
 };
-
 
 //@desc  Login
 //@route POST /customer/login
-//@access public 
+//@access public
 export const CustomerLogin = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  const loginInputs = plainToClass(CustomerLoginInputs, req.body); //  لي بحوله اصلا عشان الفاليديت علي الكلاس دا  بدل البودي
+  const inputErrors = await validate(loginInputs, {
+    validationError: { target: true },
+  });
 
-  const loginInputs = plainToClass(CustomerLoginInputs,req.body)  //  لي بحوله اصلا عشان الفاليديت علي الكلاس دا  بدل البودي
-  const inputErrors = await validate(loginInputs,{validationError:{target:true}})
-  
-  if(inputErrors.length >0){
+  if (inputErrors.length > 0) {
     return res.status(400).json(inputErrors);
   }
 
-  const {email, password} = loginInputs
-  const customer = await Customer.findOne({email:email})
+  const { email, password } = loginInputs;
+  const customer = await Customer.findOne({ email: email });
 
-  if(customer){
-    const validation = await validatePassword(password,customer.password,customer.salt)
+  if (customer) {
+    const validation = await validatePassword(
+      password,
+      customer.password,
+      customer.salt
+    );
 
-    if(validation){
+    if (validation) {
       const signature = GenerateSignature({
         _id: customer._id,
         email: customer.email,
         verified: customer.verified,
       });
-
 
       return res.status(201).json({
         token: signature,
@@ -160,10 +166,7 @@ export const CustomerLogin = async (
     }
   }
   return res.status(404).json({ message: "Login error " });
-
 };
-
-
 
 //@desc  request otp (the same idea of resend the otp )
 //@route Get /customer/otp
@@ -173,32 +176,27 @@ export const RequestOtp = async (
   res: Response,
   next: NextFunction
 ) => {
+  const customer = req.user;
 
-  const customer = req.user 
+  if (customer) {
+    const profile = await Customer.findById(customer._id);
 
-  if(customer){
-    const profile = await Customer.findById(customer._id)
+    if (profile) {
+      const { otp, expiry } = GenerateOtp();
+      profile.otp = otp;
+      profile.otp_expiry = expiry;
 
-    if(profile){
+      await profile.save();
+      await onRequestOTP(otp, profile.phone);
 
-
-      const {otp,expiry} = GenerateOtp()
-      profile.otp = otp
-      profile.otp_expiry = expiry
-
-      await profile.save()
-      await onRequestOTP(otp,profile.phone)
-
-      return res.status(200).json({message:"OTP sent your registerd phone number"})
+      return res
+        .status(200)
+        .json({ message: "OTP sent your registerd phone number" });
     }
-
-
   }
 
-  return res.status(400).json({message:"Error with Request otp"})
-
+  return res.status(400).json({ message: "Error with Request otp" });
 };
-
 
 //@desc Get customer profile
 //@route Get /customer/profile
@@ -208,20 +206,17 @@ export const GetCustomerProfile = async (
   res: Response,
   next: NextFunction
 ) => {
+  const customer = req.user;
 
-  const customer = req.user
-
-  if(customer){
-    const profile = await Customer.findById(customer._id)
-
-    if(profile){
-      return res.status(200).json(profile)
+  if (customer) {
+    const profile = await Customer.findById(customer._id);
+    if (profile) {
+      return res.status(200).json(profile);
     }
   }
 
-  return res.status(400).json({message:"Error with get profile"})
+  return res.status(400).json({ message: "Error with get profile" });
 };
-
 
 //@desc Update customer profile
 //@route patch /customer/profile
@@ -231,29 +226,121 @@ export const UpdateCustomerProfile = async (
   res: Response,
   next: NextFunction
 ) => {
+  const customer = req.user;
+  const profileInputs = plainToClass(EditCustomerProfileInputs, req.body);
+  const profileErrors = await validate(profileInputs, {
+    validationError: { target: true },
+  });
 
-
-  const customer = req.user
-  const profileInputs = plainToClass(EditCustomerProfileInputs, req.body)
-  const profileErrors = await validate(profileInputs,{validationError:{target:true}})
-
-  if(profileErrors.length >0){
-    return res.status(400).json(profileErrors)
+  if (profileErrors.length > 0) {
+    return res.status(400).json(profileErrors);
   }
-  const {fristName,lastName,address} = profileInputs
-  if(customer){
-    const profile = await Customer.findById(customer._id)
+  const { fristName, lastName, address } = profileInputs;
+  if (customer) {
+    const profile = await Customer.findById(customer._id);
 
-    if(profile){
+    if (profile) {
+      profile.fristName = fristName;
+      profile.lastName = lastName;
+      profile.address = address;
 
-      profile.fristName = fristName
-      profile.lastName = lastName
-      profile.address = address
-
-      const result = await profile.save()
-      return res.status(200).json(result)
+      const result = await profile.save();
+      return res.status(200).json(result);
     }
   }
 
-  return res.status(400).json({message:"Error with Update profile"})
+  return res.status(400).json({ message: "Error with Update profile" });
+};
+
+//@desc create order
+//@route Post /customer/create-order
+//@access  protected
+export const CreateOrder = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // 1) get the cuurent login customer
+  const customer = req.user;
+  if (customer) {
+    const profile = await Customer.findById(customer._id);
+
+    if (profile) {
+      //2) create order Id (1000 - 8999)
+      const orderId = `${Math.floor(Math.random() * 8999) + 1000}`;
+      //3) grab order item from rquest [{id:... , unit :..}]
+      const cart = <[OrderInputs]>req.body; //[{id:... , unit (quantity):..}] arr of orders
+      let cartItems = Array();
+      let netAmount = 0.0;
+      //4) Calculate order amount
+      // get the food doc  for cart items to can use the price
+      const foods = await Food.find()
+        .where("_id")
+        .in(cart.map((item) => item._id));
+
+      foods.map((food) => {
+        cart.map(({ _id, unit }) => {
+          if (food._id == _id) {
+            netAmount += food.price * unit; // calc the total order price
+            cartItems.push({ food, unit });
+          }
+        });
+      });
+      //5) create order
+      const currentOrder = await Order.create({
+        orderID: orderId,
+        items: cartItems,
+        totalAmount: netAmount,
+        orderDate: new Date(),
+        paidThrough: "COD",
+        paymentResponse: "",
+        orderStatus: "Waiting",
+      });
+
+      if (currentOrder) {
+        profile.orders.push(currentOrder);
+        await profile.save();
+        return res.status(200).json(currentOrder);
+      }
+    }
+  }
+
+  return res.status(400).json({ message: "Error Creating Order" });
+};
+
+//@desc Get all  orders
+//@route Get /customer/orders
+//@access  protected
+export const GetOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const customer = req.user;
+
+  if (customer) {
+    const profile = await Customer.findById(customer._id).populate("orders");
+    if (profile) {
+      return res.status(200).json(profile.orders);
+    }
+  }
+
+  return res.status(400).json({ message: "Error Getting Orders" });
+};
+
+//@desc Get   order by id
+//@route Get /customer/order/:id
+//@access  protected
+export const GetOrderById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const orderId = req.params.id;
+
+  if (orderId) {
+    const order = await Order.findById(orderId).populate("items.food");
+   return  res.status(200).json(order);
+  }
+  return res.status(400).json({ message: "Error Getting order" });
 };

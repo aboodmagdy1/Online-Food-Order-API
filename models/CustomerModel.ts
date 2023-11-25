@@ -1,4 +1,5 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
+import { OrderDoc } from "./OrderModel";
 
 interface CustomerDoc extends Document {
   fristName: string;
@@ -8,11 +9,12 @@ interface CustomerDoc extends Document {
   password: string;
   salt: string;
   verified:boolean;
-  otp:number,
+  otp:number;
   otp_expiry:Date;
   address:string;
   lat:number;//latitude of a location
-  lng:number //ongitude of a location
+  lng:number; //ongitude of a location
+  orders: [OrderDoc]
 
 }
 
@@ -30,7 +32,13 @@ const CustomerSchema = new Schema(
     lastName: { type: String},
     address:{ type: String},
     lat:{ type: String },
-    lng:{ type: String } 
+    lng:{ type: String } ,
+    orders:[
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+      }
+    ]
   
 
   },

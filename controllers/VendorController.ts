@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { Vendor, Food } from "../models";
-import { EditVendorInputs, VendorLoginInputs } from "../dto";
+import { EditVendorInputs, VendorLoginInputs ,CreateFoodInputs} from "../dto";
 import { FindVendor } from "./AdminController";
 import { GenerateSignature, validatePassword } from "../utility";
-import { CreateFoodInputs } from "../dto/Food.dto";
 
 //@desc  login
 //@route POST /vendor/login
