@@ -25,6 +25,12 @@
   - Signup ,Login and Verification with OTP
   - Request OTP (resend OTP)
   - Get , Update Profile data 
+  - make order , get his order or orders  
+
+* Orders 
+  - Create Order 
+  - Get Order , Orders 
+
 
 * Shopping For Public Customer  :  <h6> based on pincode of area</h6> 
   -  Get  resturants for specific area that fooodservice is available
@@ -34,9 +40,9 @@
   -  Get specific resturant  
 
 * Greate Utility 
- - Password creation and validation
- - JWT signing and verifing 
- - Notification for otp 
+  - Password creation and validation
+  - JWT signing and verifing 
+  - Notification for otp 
       
     
 * DTO Design Pattern
