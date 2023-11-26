@@ -25,25 +25,25 @@
   - Signup ,Login and Verification with OTP
   - Request OTP (resend OTP)
 
-* Profile :
-  <h6>For Customer</h6>
+* Profile 
+  - <h6>For Customer</h6>
   - Get profile information
   - Update profile information
-  <h6>For Vendor </h6>
+  - <h6>For Vendor </h6>
   - Update profile details (address, foodType , name)
   - Update Service Availability
   - Update Image Cover 
 
-* Cart : 
+* Cart  
   - Get Cart 
   - Add To cart 
   - Clear Cart
 
 * Orders :
-  <h6>For Customer</h6>
+  - <h6>For Customer</h6>
   - Create Order 
   - Get Order , Orders 
-  <h6>For Vendor</h6>
+  - <h6>For Vendor</h6>
   - Get Orders that requested by Customers to him  
   - Get specific order details
   - Process On Order like (status , remarks , readyTime)
