@@ -24,12 +24,29 @@
 * Customer <h6>For Customers that will create account</h6>
   - Signup ,Login and Verification with OTP
   - Request OTP (resend OTP)
-  - Get , Update Profile data 
-  - make order , get his order or orders  
 
-* Orders 
+* Profile :
+  <h6>For Customer</h6>
+  - Get profile information
+  - Update profile information
+  <h6>For Vendor </h6>
+  - Update profile details (address, foodType , name)
+  - Update Service Availability
+  - Update Image Cover 
+
+* Cart : 
+  - Get Cart 
+  - Add To cart 
+  - Clear Cart
+
+* Orders :
+  <h6>For Customer</h6>
   - Create Order 
   - Get Order , Orders 
+  <h6>For Vendor</h6>
+  - Get Orders that requested by Customers to him  
+  - Get specific order details
+  - Process On Order like (status , remarks , readyTime)
 
 
 * Shopping For Public Customer  :  <h6> based on pincode of area</h6> 
@@ -75,6 +92,7 @@ dependencies by running
 ```
 $ npm i
 Set your env variables
-$ npm run start:dev (for development)
-$ npm run start:prod (for production)
+$ npm start 
+no production environment
+
 
