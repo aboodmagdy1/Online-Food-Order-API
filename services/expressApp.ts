@@ -15,7 +15,8 @@ export default async(app:Application)=>{
 // middlewares
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true })); // this is for parsing form data
-    app.use(express.static(path.join(__dirname, "images")));
+    const imgaesPath = path.join(__dirname,"../images")
+    app.use(express.static(imgaesPath));
     
 // // routes
     app.use(morgan('dev'))

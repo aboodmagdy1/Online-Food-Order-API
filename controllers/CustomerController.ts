@@ -17,7 +17,8 @@ import {
 } from "../utility";
 import { Customer, Food } from "../models";
 import { Order } from "../models/OrderModel";
-import { profile } from "console";
+
+/**   --------------------- Signup , Login , Verify  ----------------------    **/
 
 //@desc  Singup
 //@route POST /customer/signup
@@ -168,6 +169,8 @@ export const CustomerLogin = async (
   return res.status(404).json({ message: "Login error " });
 };
 
+/**   --------------------- OTP ----------------------    **/
+
 //@desc  request otp (the same idea of resend the otp )
 //@route Get /customer/otp
 //@access  protected
@@ -197,6 +200,8 @@ export const RequestOtp = async (
 
   return res.status(400).json({ message: "Error with Request otp" });
 };
+
+/**   --------------------- Profile ----------------------    **/
 
 //@desc Get customer profile
 //@route Get /customer/profile
@@ -252,6 +257,102 @@ export const UpdateCustomerProfile = async (
   return res.status(400).json({ message: "Error with Update profile" });
 };
 
+/**   --------------------- Cart ----------------------    **/
+
+//@desc create cart
+//@route post /customer/cart
+//@access  protected
+export const AddToCart = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const customer = req.user;
+  if (customer) {
+    const profile = await Customer.findById(customer._id).populate("cart.food");
+    let cartItems = Array();
+    const { _id, unit } = <OrderInputs>req.body;
+    const food = await Food.findById(_id);
+    if (food) {
+      if (profile) {
+        cartItems = profile.cart;
+
+        //check for cart Items
+        if (cartItems.length > 0) {
+          // ckeck for item and update unit
+          const existFoodItem = cartItems.filter(
+            (item) => item.food._id.toString() === _id
+          );
+
+          // if the item is exist then update the unit
+          if (existFoodItem.length > 0) {
+            const index = cartItems.indexOf(existFoodItem[0]);
+            if (unit > 0) {
+              cartItems[index] = { food, unit };
+            } else {
+              cartItems.splice(index, 1); // to remove item from cart if unit = 0
+            }
+          } else {
+            // if the item is not exist then add it to the cart
+            cartItems.push({ food, unit });
+          }
+        } else {
+          // If there is no any itme i the cart
+          cartItems.push({ food, unit });
+        }
+
+        // update the cart in the database
+        if (cartItems) {
+          profile.cart = cartItems as any;
+          const cartResult = await profile.save();
+          return res.status(200).json(cartResult.cart);
+        }
+      }
+    }
+  }
+  return res.status(400).json({ message: "Error adding to cart" });
+};
+//@desc get cart
+//@route get /customer/cart
+//@access  protected
+export const GetCart = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const customer = req.user;
+  if (customer) {
+    const profile = await Customer.findById(customer._id).populate("cart.food");
+    if (profile) {
+      return res.status(200).json(profile.cart);
+    }
+  }
+  return res.status(400).json({ message: "Error Getting Cart" });
+};
+//@desc clear cart
+//@route delete /customer/cart
+//@access  protected
+export const ClearCart = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const customer = req.user;
+  if (customer) {
+    const profile = await Customer.findById(customer._id);
+    if (profile !== null) {
+      profile.cart = [] as any;
+      const cartResult = await profile.save();
+      return res
+        .status(200)
+        .json({ message: "cart successfully cleared", cart: cartResult.cart });
+    }
+  }
+  return res.status(400).json({ message: "Error Clearing Cart" });
+};
+
+/**   --------------------- Orders ----------------------    **/
+
 //@desc create order
 //@route Post /customer/create-order
 //@access  protected
@@ -272,6 +373,8 @@ export const CreateOrder = async (
       const cart = <[OrderInputs]>req.body; //[{id:... , unit (quantity):..}] arr of orders
       let cartItems = Array();
       let netAmount = 0.0;
+      let vendorId;
+
       //4) Calculate order amount
       // get the food doc  for cart items to can use the price
       const foods = await Food.find()
@@ -282,6 +385,7 @@ export const CreateOrder = async (
         cart.map(({ _id, unit }) => {
           if (food._id == _id) {
             netAmount += food.price * unit; // calc the total order price
+            vendorId = food.vendorId;
             cartItems.push({ food, unit });
           }
         });
@@ -289,15 +393,22 @@ export const CreateOrder = async (
       //5) create order
       const currentOrder = await Order.create({
         orderID: orderId,
+        vendorID: vendorId,
         items: cartItems,
         totalAmount: netAmount,
         orderDate: new Date(),
         paidThrough: "COD",
         paymentResponse: "",
         orderStatus: "Waiting",
+        remarks: " ",
+        deliveryId: " ",
+        appliedOffers: false,
+        offerId: null,
+        readyTime: 45,
       });
 
       if (currentOrder) {
+        profile.cart = [] as any;
         profile.orders.push(currentOrder);
         await profile.save();
         return res.status(200).json(currentOrder);
@@ -340,7 +451,7 @@ export const GetOrderById = async (
 
   if (orderId) {
     const order = await Order.findById(orderId).populate("items.food");
-   return  res.status(200).json(order);
+    return res.status(200).json(order);
   }
   return res.status(400).json({ message: "Error Getting order" });
 };

@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { Vendor, Food } from "../models";
-import { EditVendorInputs, VendorLoginInputs ,CreateFoodInputs} from "../dto";
+import { EditVendorInputs, VendorLoginInputs, CreateFoodInputs } from "../dto";
 import { FindVendor } from "./AdminController";
 import { GenerateSignature, validatePassword } from "../utility";
+import { Order } from "../models/OrderModel";
 
 //@desc  login
 //@route POST /vendor/login
@@ -138,7 +139,9 @@ export const AddFood = async (
   next: NextFunction
 ) => {
   const user = req.user;
-  const { name, price, foodType, readyTime, description, category } = <CreateFoodInputs>req.body;
+  const { name, price, foodType, readyTime, description, category } = <
+    CreateFoodInputs
+  >req.body;
   if (user) {
     const vendor = await FindVendor(user._id);
     const files = req.files as [Express.Multer.File];
@@ -184,4 +187,76 @@ export const GetFoods = async (
   }
 
   return res.json({ message: "Foods information not found " });
+};
+
+//@desc  Vendor get Orders that recieved
+//@route Get /vendor/orders
+//@access private(vendor only)
+export const GetCurrentOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user;
+  if (user != null) {
+    const orders = await Order.find({ vendorID: user._id }).populate(
+      "items.food"
+    );
+    if (orders != null) {
+      return res.status(200).json(orders);
+    }
+  }
+  return res.status(400).json({
+    message: "Error while getting orders",
+  });
+};
+//@desc  Vendor specific order details
+//@route Get /vendor/order/:id
+//@access private(vendor only)
+export const GetOrderDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const orderId = req.params.id;
+  if (orderId) {
+    const order = await Order.findById(orderId).populate("items.food");
+    if (order != null) {
+      return res.status(200).json(order);
+    }
+  }
+  return res.status(400).json({
+    message: "Error while getting this order",
+  });
+};
+//@desc  Vendor update order process (waiting , pending, completed,..)
+//@route Get /vendor/order/:id/process
+//@access private(vendor only)
+export const ProcessOrder = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const orderId = req.params.id;
+  const { status, remarks, time } = req.body;
+
+  if (orderId) {
+    const order = await Order.findById(orderId).populate("items.food");
+    if (order != null) {
+      order.orderStatus = status;
+      order.remarks = remarks;
+
+      if (time) {
+        order.readyTime = time;
+      }
+
+      const orderResult = await order.save();
+      if (orderResult !== null) {
+        return res.status(200).json(orderResult);
+      }
+    }
+  }
+  return res.status(400).json({
+    message: "Error while process  this order",
+  });
 };

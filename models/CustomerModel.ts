@@ -14,7 +14,9 @@ interface CustomerDoc extends Document {
   address:string;
   lat:number;//latitude of a location
   lng:number; //ongitude of a location
-  orders: [OrderDoc]
+  orders: [OrderDoc];
+  cart:[any]
+
 
 }
 
@@ -37,6 +39,12 @@ const CustomerSchema = new Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Order",
+      }
+    ]
+    , cart: [
+      {
+        food : {type: mongoose.Schema.ObjectId, ref : "Food" , required: true},
+         unit : {type: Number, required: true}
       }
     ]
   
