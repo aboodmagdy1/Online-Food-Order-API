@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import { plainToClass } from "class-transformer";
 import {
+  CartItem,
   CreateCustomerInputs,
   CustomerLoginInputs,
   EditCustomerProfileInputs,
@@ -17,6 +18,8 @@ import {
 } from "../utility";
 import { Customer, Food, Offer } from "../models";
 import { Order } from "../models";
+import { trace } from "console";
+import { Transaction } from "../models/TransactionModel";
 
 /**   --------------------- Signup , Login , Verify  ----------------------    **/
 
@@ -271,7 +274,7 @@ export const AddToCart = async (
   if (customer) {
     const profile = await Customer.findById(customer._id).populate("cart.food");
     let cartItems = Array();
-    const { _id, unit } = <OrderInputs>req.body;
+    const { _id, unit } = <CartItem>req.body;
     const food = await Food.findById(_id);
     if (food) {
       if (profile) {
@@ -351,6 +354,57 @@ export const ClearCart = async (
   return res.status(400).json({ message: "Error Clearing Cart" });
 };
 
+/**   --------------------- Payments ----------------------    **/
+//@desc pay and make transaction
+//@route Get /customer/create-payment
+//@access  protected
+export const CreatePayment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const customer = req.user;
+
+  const { amount, paymentMode, offerId } = req.body;
+  let totalAmount = Number(amount); // total cost
+
+  // apply offer if exist
+  if (offerId) {
+    const appliedOffer = await Offer.findById(offerId);
+    if (appliedOffer) {
+      if (appliedOffer.isActice) {
+        totalAmount = totalAmount - appliedOffer.offerAmount;
+      }
+    }
+  }
+
+  //perform payment geteway Charge Api call
+
+  // Create record on transactions
+  const transaction = await Transaction.create({
+    customer: customer ? customer._id : null,
+    vendorId: " ",
+    orderId: " ",
+    orderValue: totalAmount,
+    offerUsed: offerId || "NA",
+    status: "OPEN",
+    paymentMode: paymentMode,
+    paymentResponse: " payment is Cash On Delivery",
+  });
+  // return transaction id to client
+  return res.status(200).json(transaction);
+};
+
+const validateTransaction = async (txnId: string) => {
+  const currentTransaction = await Transaction.findById(txnId);
+  if (currentTransaction) {
+    if (currentTransaction.status.toLowerCase() !== "failed") {
+      return { status: true, currentTransaction };
+    }
+  }
+  return { status: false, currentTransaction };
+};
+
 /**   --------------------- Orders ----------------------    **/
 
 //@desc create order
@@ -363,14 +417,23 @@ export const CreateOrder = async (
 ) => {
   // 1) get the cuurent login customer
   const customer = req.user;
+  const { txnId, amount, items } = <OrderInputs>req.body;
+
   if (customer) {
+    //1) validate transaction
+    const { status, currentTransaction } = await validateTransaction(
+      txnId
+    );
+    if (!status) {
+      return res.status(400).json({ message: "Error with creating order" });
+    }
+
     const profile = await Customer.findById(customer._id);
 
     if (profile) {
       //2) create order Id (1000 - 8999)
       const orderId = `${Math.floor(Math.random() * 8999) + 1000}`;
       //3) grab order item from rquest [{id:... , unit :..}]
-      const cart = <[OrderInputs]>req.body; //[{id:... , unit (quantity):..}] arr of orders
       let cartItems = Array();
       let netAmount = 0.0;
       let vendorId;
@@ -379,10 +442,10 @@ export const CreateOrder = async (
       // get the food doc  for cart items to can use the price
       const foods = await Food.find()
         .where("_id")
-        .in(cart.map((item) => item._id));
+        .in(items.map((item) => item._id));
 
       foods.map((food) => {
-        cart.map(({ _id, unit }) => {
+        items.map(({ _id, unit }) => {
           if (food._id == _id) {
             netAmount += food.price * unit; // calc the total order price
             vendorId = food.vendorId;
@@ -395,23 +458,30 @@ export const CreateOrder = async (
         orderID: orderId,
         vendorID: vendorId,
         items: cartItems,
-        totalAmount: netAmount,
+        totalAmount: netAmount, // total without offers 
+        paidAmount:amount, // total amount after offers 
         orderDate: new Date(),
-        paidThrough: "COD",
-        paymentResponse: "",
         orderStatus: "Waiting",
         remarks: " ",
         deliveryId: " ",
-        appliedOffers: false,
-        offerId: null,
         readyTime: 45,
       });
+
+      //6) after the order is created update the transaction
 
       if (currentOrder) {
         profile.cart = [] as any;
         profile.orders.push(currentOrder);
-        await profile.save();
-        return res.status(200).json(currentOrder);
+
+        if (currentTransaction) {
+          currentTransaction.vendorId= currentOrder.vendorID
+          currentTransaction.status = "CONFIRMED";
+          currentTransaction.orderId = orderId;
+          await currentTransaction.save();
+        }
+
+        const responseProfile = await profile.save();
+        return res.status(200).json(responseProfile);
       }
     }
   }
@@ -456,4 +526,30 @@ export const GetOrderById = async (
   return res.status(400).json({ message: "Error Getting order" });
 };
 
+//@desc verivy offer
+//@route Get /customer/offers/:id
+//@access  protected
+export const VerifyOffer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const offerId = req.params.id;
+  const customer = req.user;
 
+  if (customer) {
+    const appliedOffer = await Offer.findById(offerId);
+
+    if (appliedOffer) {
+      if (appliedOffer.promoType === "USER") {
+        //apply this offer once for  current user
+      } else {
+        if (appliedOffer.isActice) {
+          return res
+            .status(200)
+            .json({ message: "Offer is Valid", offer: appliedOffer });
+        }
+      }
+    }
+  }
+};

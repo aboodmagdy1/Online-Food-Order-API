@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { CreateVendorInput } from "../dto";
 import { Vendor } from "../models";
 import { GenerateSalt, GeneratePassword } from "../utility";
+import { Transaction } from "../models/TransactionModel";
 
 // as a vactor to find Vendor with email or id in different cases 
 export const FindVendor = async (id:string | undefined ,email?:string)=>{
@@ -104,3 +105,51 @@ export const GetVendorById =async  (
 
 
 };
+
+
+//@desc admin  transactions
+//@route GET /admin/transactions
+//@access private (admin only)
+export const GetTransactions =async  (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+
+  const transactions = await Transaction.find()
+
+  if (transactions !== null) {
+    return res.json(transactions);
+  }
+
+  return res.json({ message: "transactions data not available" });
+
+
+
+
+};
+
+//@desc admin get  specific transaction
+//@route GET /admin/transaction/:id
+//@access private (admin only)
+export const GetTransactionById =async  (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const txnId = req.params.id;
+
+  const transaction = await Transaction.findById(txnId)
+
+  if (transaction !== null) {
+    return res.json(transaction);
+  }
+
+  return res.json({ message: "transaction data not available" });
+
+
+
+
+};
+
+

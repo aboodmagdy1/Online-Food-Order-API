@@ -20,6 +20,7 @@
 
 #### Admin Dashboard
   - Get , Create Vendors
+  - Get Transaction/s
 
 #### Vendor Dashboard
   - Get , Add Foods
@@ -50,6 +51,7 @@
       - Get Orders that requested by Customers to him  
       - Get specific order details
       - Process On Order like (status , remarks , readyTime)
+      - make  transaction 
 #### Offers :
   - **For Customer** 
       - Get Available Offers
@@ -60,13 +62,13 @@
       - Edit offer
 
 #### Shopping For Public Customer  :  
-  - <h6> Public pages and  based on pincode of area</h6> 
-  -  Get  resturants for specific area that fooodservice is available
-  -  Get top resturants  in specific area
-  -  Get food that ready time will be less than 30 minutes in specific area
-  -  Get get all availabel foods in this for specific area
-  -  Get specific resturant  
-  -  Get All available offers for specific area
+  - **<h6> Public pages and  based on pincode of area**
+    -  Get  resturants for specific area that fooodservice is available
+    -  Get top resturants  in specific area
+    -  Get food that ready time will be less than 30 minutes in specific area
+    -  Get get all availabel foods in this for specific area
+    -  Get specific resturant  
+    -  Get All available offers for specific area
 
 #### Greate Utility 
   - Password creation and validation
