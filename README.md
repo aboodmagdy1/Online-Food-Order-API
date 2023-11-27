@@ -11,48 +11,55 @@
 
 ## Key Features 📝
 
-* Authentication and Authorization
-  - Signup , Login  with OTP , JWB
+#### Authentication and Authorization
+  - **For Customer**
+    - Signup , Login and Verification with OTP
+    - Request OTP (resend OTP)
+  - **For Vendor** 
+    - Login 
 
-* Admin Dashboard
+#### Admin Dashboard
   - Get , Create Vendors
 
-* Vendor Dashboard
+#### Vendor Dashboard
   - Get , Add Foods
-  - Update Service Availability
+  - Update Service Availability , profile
+  - Get , Create , Edit Offers 
+  - Get orders , Process order 
 
-* Customer <h6>For Customers that will create account</h6>
-  - Signup ,Login and Verification with OTP
-  - Request OTP (resend OTP)
+#### Profile 
+  - **For Customer**
+      - Get profile information
+      - Update profile information
+  - **For Vendor**
+      - Update profile details (address, foodType , name)
+      - Update Service Availability
+      - Update Image Cover 
 
-* Profile 
-  - <h6>For Customer</h6>
-  - Get profile information
-  - Update profile information
-  - <h6>For Vendor </h6>
-  - Update profile details (address, foodType , name)
-  - Update Service Availability
-  - Update Image Cover 
+#### Cart  
+  - **For Customer** 
+    - Get Cart 
+    - Add To cart 
+    - Clear Cart
 
-* Cart  
-  - Get Cart 
-  - Add To cart 
-  - Clear Cart
+#### Orders :
+   - **For Customer** 
+      - Create Order 
+      - Get Order , Orders 
+   - **For Customer** 
+      - Get Orders that requested by Customers to him  
+      - Get specific order details
+      - Process On Order like (status , remarks , readyTime)
+#### Offers :
+  - **For Customer** 
+      - Get Available Offers
+      - Applay Offers 
+  - **For Vendor** 
+      - Get Offers All Offers 
+      - Get a specific offer 
+      - Edit offer
 
-* Orders :
-  - <h6>For Customer</h6>
-  - Create Order 
-  - Get Order , Orders 
-  - <h6>For Vendor</h6>
-  - Get Orders that requested by Customers to him  
-  - Get specific order details
-  - Process On Order like (status , remarks , readyTime)
-* Offers :
-  - <h6>For Vendor</h6>
-  - Get Offers All Offers 
-  - Get a specific offer 
-  - Edit offer
-* Shopping For Public Customer  :  
+#### Shopping For Public Customer  :  
   - <h6> Public pages and  based on pincode of area</h6> 
   -  Get  resturants for specific area that fooodservice is available
   -  Get top resturants  in specific area
@@ -61,13 +68,13 @@
   -  Get specific resturant  
   -  Get All available offers for specific area
 
-* Greate Utility 
+#### Greate Utility 
   - Password creation and validation
   - JWT signing and verifing 
   - Notification for otp 
       
     
-* DTO Design Pattern
+#### DTO Design Pattern
 
 ## Build With 🏗️
 
