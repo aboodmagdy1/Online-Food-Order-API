@@ -15,7 +15,7 @@ import {
   GenerateSignature,
   validatePassword,
 } from "../utility";
-import { Customer, Food } from "../models";
+import { Customer, Food, Offer } from "../models";
 import { Order } from "../models";
 
 /**   --------------------- Signup , Login , Verify  ----------------------    **/
@@ -455,3 +455,5 @@ export const GetOrderById = async (
   }
   return res.status(400).json({ message: "Error Getting order" });
 };
+
+

@@ -417,6 +417,6 @@ export const EditOffer = async (
     }
 
     }
-  return res.status(400).json({ message: "Error Createing Offer" });
+  return res.status(400).json({ message: "Error Editing Offer" });
 
 };

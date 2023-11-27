@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { Vendor, FoodDoc } from "../models";
+import { Vendor, FoodDoc, Offer } from "../models";
 
 // the pincode is the area code  to get the results based on it to be near to user
 
@@ -117,3 +117,17 @@ export const ResturantById = async (
   }
   return res.status(404).json({ message: "Data not found" });
 };
+
+
+//@desc Get   offers  by pincode
+//@route Get /customer/offers/:pincode
+//@access  protected
+export const GetAvailableOffers = async (req: Request, res: Response, next: NextFunction) => {
+  const pincode = req.params.pincode;
+  const offers = await Offer.find({pincode:pincode, isActice:true})
+
+  if(offers){
+    return res.status(200).json(offers);
+  }
+  return res.status(400).json({ message: "Error Getting offers" });
+}
