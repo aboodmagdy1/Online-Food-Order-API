@@ -47,8 +47,11 @@
   - Get Orders that requested by Customers to him  
   - Get specific order details
   - Process On Order like (status , remarks , readyTime)
-
-
+* Offers :
+  - <h6>For Vendor</h6>
+  - Get Offers All Offers 
+  - Get a specific offer 
+  - Edit offer
 * Shopping For Public Customer  :  <h6> based on pincode of area</h6> 
   -  Get  resturants for specific area that fooodservice is available
   -  Get top resturants  in specific area
