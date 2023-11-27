@@ -1,11 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { Vendor, Food } from "../models";
-import { EditVendorInputs, VendorLoginInputs, CreateFoodInputs } from "../dto";
+import { Vendor, Food, Offer, OfferDoc } from "../models";
+import {
+  EditVendorInputs,
+  VendorLoginInputs,
+  CreateFoodInputs,
+  CreateOfferInputs,
+} from "../dto";
 import { FindVendor } from "./AdminController";
 import { GenerateSignature, validatePassword } from "../utility";
 import { Order } from "../models";
 
-// -------------------------------- auth and profile  -------------------------------- 
+// -------------------------------- auth and profile  --------------------------------
 
 //@desc  login
 //@route POST /vendor/login
@@ -132,7 +137,7 @@ export const UpdateVendorService = async (
   return res.json({ message: "Vendor information not found" });
 };
 
-// -------------------------------- foods -------------------------------- 
+// -------------------------------- foods --------------------------------
 
 //@desc  Vendor create food
 //@route Post /vendor/Food
@@ -193,7 +198,7 @@ export const GetFoods = async (
   return res.json({ message: "Foods information not found " });
 };
 
-// -------------------------------- orders -------------------------------- 
+// -------------------------------- orders --------------------------------
 
 //@desc  Vendor get Orders that recieved
 //@route Get /vendor/orders
@@ -267,26 +272,82 @@ export const ProcessOrder = async (
   });
 };
 
+// -------------------------------- offers --------------------------------
 
-
-
-// -------------------------------- offers -------------------------------- 
-
-//@desc  Vendor Get its offers 
+//@desc  Vendor Get its offers
 //@route Get /vendor/offers
 //@access private(vendor only)
-export const GetOffers = async ( req: Request, res: Response , next : NextFunction) => {
-  
-}
-//@desc  Vendor add offer 
+export const GetOffers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user;
+
+  if (user) {
+    const vendor = await Vendor.findById(user._id);
+    if (vendor) {
+      const offers = await Offer.find().where("vendors").in([vendor]);
+      return res.status(200).json(offers)
+    }
+  }
+  return res.status(400).json({ message: "Error while getting offers" });
+};
+//@desc  Vendor add offer
 //@route post /vendor/offer
 //@access private(vendor only)
-export const AddOffer = async ( req: Request, res: Response , next : NextFunction) => {
+export const AddOffer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user;
 
-}
-//@desc  Vendor edit an offer 
+  if (user) {
+    const {
+      offerType,
+      offerAmount,
+      minAmount,
+      bank,
+      bins,
+      promoType,
+      promoCode,
+      pincode,
+      title,
+      description,
+      startValidity,
+      endvalidity,
+      isActice,
+    } = <CreateOfferInputs>req.body;
+    const vendor = await Vendor.findById(user._id);
+    if (vendor) {
+      const offer = await Offer.create({
+        offerType,
+        offerAmount,
+        minAmount,
+        vendors: [vendor],
+        bank,
+        bins,
+        promoType,
+        promoCode,
+        pincode,
+        title,
+        description,
+        startValidity,
+        endvalidity,
+        isActice,
+      });
+
+      return res.status(200).json(offer);
+    }
+  }
+  return res.status(400).json({ message: "Error Createing Offer" });
+};
+//@desc  Vendor edit an offer
 //@route put /vendor/offer/:id
 //@access private(vendor only)
-export const EditOffer = async ( req: Request, res: Response , next : NextFunction) => {
-
-}
+export const EditOffer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {};

@@ -12,7 +12,8 @@ interface VendorDoc extends Document {
   email: string;
   password: string;
   salt: string;
-    foods: any;
+  foods: any;
+
   rating: number;
   coverImages: [string];
   serviceAvailable: boolean;

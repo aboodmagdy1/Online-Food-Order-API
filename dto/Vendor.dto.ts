@@ -32,3 +32,21 @@ export interface VendorPayload {
     foodTypes : [string] ;
 
 }
+
+
+export interface CreateOfferInputs{
+    offerType: string; 
+    title: string;
+    description: string; 
+    minAmount: number; 
+    offerAmount: number; 
+    startValidity: Date;
+    endvalidity: Date;
+    promoCode: string; 
+    promoType: string; 
+    bank: [any]; 
+    bins: [any]; 
+    pincode: string; 
+    isActice: string;
+  
+}

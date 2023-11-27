@@ -9,7 +9,7 @@ export interface OfferDoc extends Document {
   offerAmount: number; // this like discount value
   startValidity: Date;
   endvalidity: Date;
-  promocode: string; // the code that customer will use to apply this offer
+  promoCode: string; // the code that customer will use to apply this offer
   promoType: string; // User , bank , card , all ( mean this offer will applied to one user or specific bank or card or all customers )
   bank: [any]; // the banks that the offer will applied to
   bins: [any]; // the cards that the offer will apply to
@@ -27,7 +27,7 @@ const OfferSchema = new Schema(
     offerAmount: { type: Number, required: true },
     startValidity: { type: Date},
     endtValidity: { type: Date },
-    promocode: { type: String, required: true },
+    promoCode: { type: String, required: true },
     promoType: { type: String, required: true },
     bank: [{ type: String}],
     bins: [{ type: Number }],
