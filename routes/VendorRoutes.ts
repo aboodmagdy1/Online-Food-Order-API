@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { AddFood, GetCurrentOrders, GetFoods, GetOrderDetails, ProcessOrder, UpdateVendorCoverImages, VendorLogin } from "../controllers";
+import { AddFood, AddOffer, EditOffer, GetCurrentOrders, GetFoods, GetOffers, GetOrderDetails, ProcessOrder, UpdateVendorCoverImages, VendorLogin } from "../controllers";
 import {
   GetVendorProfile,
   UpdateVendorProfile,
@@ -37,7 +37,10 @@ router.get('/orders',GetCurrentOrders)
 router.get('/order/:id',GetOrderDetails)
 router.put('/order/:id/process',ProcessOrder)
 
-
+//offers 
+router.get('/offers',GetOffers)
+router.post('/offer',AddOffer)
+router.put('/offer/:id',EditOffer)
 
 router.get("/", (req: Request, res: Response, next: NextFunction) => {
   res.json("hello from vendor");

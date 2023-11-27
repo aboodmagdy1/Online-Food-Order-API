@@ -3,7 +3,9 @@ import { Vendor, Food } from "../models";
 import { EditVendorInputs, VendorLoginInputs, CreateFoodInputs } from "../dto";
 import { FindVendor } from "./AdminController";
 import { GenerateSignature, validatePassword } from "../utility";
-import { Order } from "../models/OrderModel";
+import { Order } from "../models";
+
+// -------------------------------- auth and profile  -------------------------------- 
 
 //@desc  login
 //@route POST /vendor/login
@@ -130,6 +132,8 @@ export const UpdateVendorService = async (
   return res.json({ message: "Vendor information not found" });
 };
 
+// -------------------------------- foods -------------------------------- 
+
 //@desc  Vendor create food
 //@route Post /vendor/Food
 //@access private(vendor only)
@@ -188,6 +192,8 @@ export const GetFoods = async (
 
   return res.json({ message: "Foods information not found " });
 };
+
+// -------------------------------- orders -------------------------------- 
 
 //@desc  Vendor get Orders that recieved
 //@route Get /vendor/orders
@@ -262,3 +268,25 @@ export const ProcessOrder = async (
 };
 
 
+
+
+// -------------------------------- offers -------------------------------- 
+
+//@desc  Vendor Get its offers 
+//@route Get /vendor/offers
+//@access private(vendor only)
+export const GetOffers = async ( req: Request, res: Response , next : NextFunction) => {
+  
+}
+//@desc  Vendor add offer 
+//@route post /vendor/offer
+//@access private(vendor only)
+export const AddOffer = async ( req: Request, res: Response , next : NextFunction) => {
+
+}
+//@desc  Vendor edit an offer 
+//@route put /vendor/offer/:id
+//@access private(vendor only)
+export const EditOffer = async ( req: Request, res: Response , next : NextFunction) => {
+
+}

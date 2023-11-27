@@ -16,7 +16,7 @@ import {
   validatePassword,
 } from "../utility";
 import { Customer, Food } from "../models";
-import { Order } from "../models/OrderModel";
+import { Order } from "../models";
 
 /**   --------------------- Signup , Login , Verify  ----------------------    **/
 
