@@ -285,11 +285,31 @@ export const GetOffers = async (
   const user = req.user;
 
   if (user) {
-    const vendor = await Vendor.findById(user._id);
-    if (vendor) {
-      const offers = await Offer.find().where("vendors").in([vendor]);
-      return res.status(200).json(offers)
+   
+    const offers = await Offer.find().populate("vendors")
+    let currentOffers = Array()
+
+    if(offers){
+
+      offers.map(offer=>{
+        if(offer.vendors){
+          offer.vendors.map(vendor=>{
+            if(vendor._id.toString() === user._id){
+              currentOffers.push(offer)
+            }
+          })
+        }
+
+          // to push all offers that not created by vendors (by admin)
+        if(offer.offerType === "GENIRIC"){
+          currentOffers.push(offer)
+        }
+
+      })
+
+      
     }
+    return res.status(200).json(currentOffers)
   }
   return res.status(400).json({ message: "Error while getting offers" });
 };
@@ -350,4 +370,53 @@ export const EditOffer = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  const user = req.user;
+  const offerId = req.params.id;
+
+  if (user) {
+    const {
+      offerType,
+      offerAmount,
+      minAmount,
+      bank,
+      bins,
+      promoType,
+      promoCode,
+      pincode,
+      title,
+      description,
+      startValidity,
+      endvalidity,
+      isActice,
+    } = <CreateOfferInputs>req.body;
+
+    const currentOffer = await Offer.findById(offerId);
+    if(currentOffer){
+      const vendor = await Vendor.findById(user._id);
+  
+      if (vendor) {
+      currentOffer.offerType = offerType
+      currentOffer.offerAmount = offerAmount
+      currentOffer.minAmount = minAmount
+      currentOffer.bank = bank 
+      currentOffer.bins = bins
+      currentOffer.promoType= promoType
+      currentOffer.promoCode= promoCode
+      currentOffer.pincode= pincode
+      currentOffer.title = title
+      currentOffer.description= description
+      currentOffer.startValidity = startValidity
+      currentOffer.endvalidity= endvalidity
+      currentOffer.isActice = isActice
+        
+        const updatedOffer = await currentOffer.save();
+
+        return res.status(200).json(updatedOffer);
+      }
+    }
+
+    }
+  return res.status(400).json({ message: "Error Createing Offer" });
+
+};
