@@ -70,13 +70,11 @@ export const DeliveryUserSignup = async (
       verified: result.verified,
     });
 
-    return res
-      .status(201)
-      .json({
-        message: "Delivery user created successfully",
-        verified: result.verified,
-        token: signauter,
-      });
+    return res.status(201).json({
+      message: "Delivery user created successfully",
+      verified: result.verified,
+      token: signauter,
+    });
   }
 
   return res.status(400).json({ message: "Error with creating delivery user" });
@@ -106,21 +104,34 @@ export const DeliveryUserLogin = async (
   const { email, password } = deliverUserLoginInputs;
 
   //check if this user already exists with this email
-  const existingDeliveryUser = await Delivery.findOne({ email: email });
+  const deliveryUser = await Delivery.findOne({ email: email });
 
-  if (existingDeliveryUser) {
+  if (deliveryUser) {
     //verify password
     const validation = await validatePassword(
       password,
-      existingDeliveryUser.password,
-      existingDeliveryUser.salt
+      deliveryUser.password,
+      deliveryUser.salt
     );
 
+    if (validation) {
+      const signature = GenerateSignature({
+        _id: deliveryUser._id,
+        email: deliveryUser.email,
+        verified: deliveryUser.verified,
+      });
 
-    if(validation){
-        
+
+        return res.status(200).json({
+            message: "Login successfully",
+            verified: deliveryUser.verified,
+            token: signature,
+        });
     }
   }
+
+
+  return res.status(401).json({ message: "Invalid credentials" });
 };
 
 /**   --------------------- Change Status  ----------------------    **/
