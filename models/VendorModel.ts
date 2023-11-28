@@ -8,12 +8,13 @@ interface VendorDoc extends Document {
   foodType: [string];
   pincode: string;
   address: string;
+  lng :number ;
+  lat:number ;
   phone: string;
   email: string;
   password: string;
   salt: string;
   foods: any;
-
   rating: number;
   coverImages: [string];
   serviceAvailable: boolean;
@@ -27,6 +28,8 @@ const VendorSchema = new Schema(
     foodType: { type: [String] },
     pincode: { type: String, required: true },
     address: { type: String, required: true },
+    lng:{type: Number},
+    lat:{type: Number},
     phone: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },

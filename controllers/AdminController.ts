@@ -32,7 +32,7 @@ export const CreateVendor = async (
     email,
     password,
     phone,
-    address,
+    address
   } = <CreateVendorInput>req.body;
 
   const existingVendor =  await FindVendor('',email)
@@ -60,7 +60,10 @@ export const CreateVendor = async (
     rating: 0,
     serviceAvailable: false,
     coverImages: [],
-    foods:[]
+    foods:[],
+    lat:0,
+    lng:0
+
   });
   res.json(createdVendor);
 };

@@ -16,7 +16,7 @@ import {
   GenerateSignature,
   validatePassword,
 } from "../utility";
-import { Customer, Food, Offer } from "../models";
+import { Customer, Food, Offer, Vendor } from "../models";
 import { Order } from "../models";
 import { trace } from "console";
 import { Transaction } from "../models/TransactionModel";
@@ -380,6 +380,7 @@ export const CreatePayment = async (
 
   //perform payment geteway Charge Api call
 
+
   // Create record on transactions
   const transaction = await Transaction.create({
     customer: customer ? customer._id : null,
@@ -405,6 +406,24 @@ const validateTransaction = async (txnId: string) => {
   return { status: false, currentTransaction };
 };
 
+/**   --------------------- Delivery Notification  ----------------------    **/
+
+
+const assignOrderForDelivery = async (orderId :string, vendorId:string)=>{
+
+
+  // find the vendor 
+  const vendor = await Vendor.findById(orderId)
+
+  // find the available delivery person 
+
+
+
+  // check the nearst delivery person and assign order to tit 
+
+
+  // update DeliveryID
+}
 /**   --------------------- Orders ----------------------    **/
 
 //@desc create order
@@ -476,11 +495,12 @@ export const CreateOrder = async (
         if (currentTransaction) {
           currentTransaction.vendorId= currentOrder.vendorID
           currentTransaction.status = "CONFIRMED";
-          currentTransaction.orderId = orderId;
+          currentTransaction.orderId = orderId; // دا رقم الاوردر وليس ال اي دي بتاع الاوردر
           await currentTransaction.save();
         }
-
         const responseProfile = await profile.save();
+        assignOrderForDelivery(currentOrder._id, currentOrder.vendorID)
+        
         return res.status(200).json(responseProfile);
       }
     }

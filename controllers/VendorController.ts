@@ -116,7 +116,7 @@ export const UpdateVendorCoverImages = async (
   }
 };
 
-//@desc  update vendor services availabel or not
+//@desc  update vendor services availabel or not and his address (lng,lat)
 //@route PATCH /vendor/services
 //@access private(vendor only)
 export const UpdateVendorService = async (
@@ -125,10 +125,15 @@ export const UpdateVendorService = async (
   next: NextFunction
 ) => {
   const user = req.user;
+  const {lng,lat} = req.body
   if (user) {
     const existingVendor = await FindVendor(user._id);
     if (existingVendor !== null) {
       existingVendor.serviceAvailable = !existingVendor.serviceAvailable;
+      if(lat&& lng){
+        existingVendor.lat = lat 
+        existingVendor.lng = lng
+      }
       const savedResult = await existingVendor.save();
       return res.json(savedResult);
     }

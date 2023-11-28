@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import morgan from "morgan"
 
 
-import { VendorRoute, AdminRoute ,ShoppingRoute,CustomerRoute} from "../routes";
+import { VendorRoute, AdminRoute ,ShoppingRoute,CustomerRoute,DeliveryRoute} from "../routes";
 
 
 
@@ -23,6 +23,7 @@ export default async(app:Application)=>{
     app.use("/admin", AdminRoute);
     app.use("/vendor", VendorRoute);
     app.use("/customer", CustomerRoute);
+    app.use("/delivery", DeliveryRoute);
 
     app.use(ShoppingRoute)
 
