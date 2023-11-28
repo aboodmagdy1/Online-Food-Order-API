@@ -24,6 +24,8 @@
 #### Admin Dashboard
   - Get , Create Vendors
   - Get Transaction/s
+  - Get Delivery Persons 
+  - Verify Delivery Persons
 
 #### Vendor Dashboard
   - Get , Add Foods
@@ -35,7 +37,7 @@
 #### Delivery Person 
   -  profile services 
   - update status (online , offline)
-  - update lanetude and latitude information
+  - update location information (lng,lat) 
   
 
 

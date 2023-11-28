@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { CreateVendorInput } from "../dto";
-import { Vendor } from "../models";
+import { Delivery, Vendor } from "../models";
 import { GenerateSalt, GeneratePassword } from "../utility";
 import { Transaction } from "../models/TransactionModel";
 
@@ -155,4 +155,46 @@ export const GetTransactionById =async  (
 
 };
 
+//----------------------------------Delivery -------------------
 
+//@desc admin update   specific delivery status
+//@route GET /admin/delivery/verify
+//@access private (admin only)
+export const VerifyDeliveryUser =async  (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const {_id , status} = req.body
+
+  if(_id){
+    const deliveryProfile = await Delivery.findById(_id)
+
+    if(deliveryProfile){
+      deliveryProfile.verified = status
+
+      const result = await deliveryProfile.save()
+      return res.json(result);
+
+    }}
+
+  return res.json({ message: "Unable to verify Delivery User status " });
+
+};
+//@desc admin update   specific delivery status
+//@route GET /admin/delivery
+//@access private (admin only)
+export const GetDeliveryUsers =async  (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+
+    const deliveryUsers = await Delivery.find()
+    if(deliveryUsers){
+      return res.json(deliveryUsers);
+    }
+
+  return res.json({ message: "Delivery users not availabel now" });
+
+};
