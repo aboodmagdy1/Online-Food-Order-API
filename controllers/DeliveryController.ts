@@ -143,7 +143,30 @@ export const UpdateDeliveryUserStatus = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+
+
+    const deliveryUser = req.user
+
+    if(deliveryUser){
+        const {lat,lng} = req.body
+
+        const profile = await Delivery.findById(deliveryUser._id)
+        if(profile){
+
+            profile.lat = lat 
+            profile.lng = lng
+            profile.isAvailable = !profile.isAvailable  // toggle status after update location
+
+            const result = await profile.save()
+
+            res.status(200).json(result)
+        }
+    }
+
+    return res.status(400).json({message:"Error with update status"})
+
+};
 
 /**   --------------------- Profile ----------------------    **/
 
