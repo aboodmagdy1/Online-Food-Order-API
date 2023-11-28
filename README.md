@@ -17,6 +17,9 @@
     - Request OTP (resend OTP)
   - **For Vendor** 
     - Login 
+  - **For Delivery Person**
+    - Signup , login  
+
 
 #### Admin Dashboard
   - Get , Create Vendors
@@ -28,6 +31,13 @@
   - Get , Create , Edit Offers 
   - Get orders , Process order 
 
+
+#### Delivery Person 
+  -  profile services 
+  - update status (online , offline)
+  
+
+
 #### Profile 
   - **For Customer**
       - Get profile information
@@ -36,6 +46,9 @@
       - Update profile details (address, foodType , name)
       - Update Service Availability
       - Update Image Cover 
+  - **For Delivery Person**
+      - Get profile information
+      - Update profile information
 
 #### Cart  
   - **For Customer** 
