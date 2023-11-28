@@ -13,12 +13,13 @@ import { Delivery } from "../models";
 import {
   CreateDeliveryUserInputs,
   DeliveryLoginUserInputs,
+  EditDeliveryUserProfileInputs,
 } from "../dto/Delivery.dto";
 
 /**   --------------------- Signup , Login , Verify  ----------------------    **/
 
 //@desc  Singup
-//@route POST /Delivery/signup
+//@route POST /delivery/signup
 //@access public
 export const DeliveryUserSignup = async (
   req: Request,
@@ -81,7 +82,7 @@ export const DeliveryUserSignup = async (
 };
 
 //@desc  Login
-//@route POST /Delivery/login
+//@route POST /delivery/login
 //@access public
 export const DeliveryUserLogin = async (
   req: Request,
@@ -136,7 +137,7 @@ export const DeliveryUserLogin = async (
 
 /**   --------------------- Change Status  ----------------------    **/
 //@desc  update status
-//@route put /Delivery/change_status
+//@route put /delivery/change_status
 //@access private
 export const UpdateDeliveryUserStatus = async (
   req: Request,
@@ -147,16 +148,16 @@ export const UpdateDeliveryUserStatus = async (
 /**   --------------------- Profile ----------------------    **/
 
 //@desc Get Delivery profile
-//@route Get /Delivery/profile
+//@route Get /delivery/profile
 //@access  protected
 export const GetDeliveryUserProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const delivery = req.user;
-  if (delivery) {
-    const deliveryProfile = await Delivery.findById(delivery._id);
+  const deliveryUser = req.user;
+  if (deliveryUser) {
+    const deliveryProfile = await Delivery.findById(deliveryUser._id);
 
     return res.status(200).json(deliveryProfile);
   }
@@ -165,12 +166,36 @@ export const GetDeliveryUserProfile = async (
 };
 
 //@desc Update Delivery profile
-//@route patch /Delivery/profile
+//@route patch /delivery/profile
 //@access  protected
 export const UpdateDeliveryUserProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  return res.status(400).json({ message: "Error with Update profile" });
+  
+    const deliveryUser = req.user;
+    const profileInputs = plainToClass(EditDeliveryUserProfileInputs, req.body);
+    const profileErrors = await validate(profileInputs, {
+      validationError: { target: true },
+    });
+  
+    if (profileErrors.length > 0) {
+      return res.status(400).json(profileErrors);
+    }
+    const { fristName, lastName, address } = profileInputs;
+    if (deliveryUser) {
+      const profile = await Delivery.findById(deliveryUser._id);
+  
+      if (profile) {
+        profile.fristName = fristName;
+        profile.lastName = lastName;
+        profile.address = address;
+  
+        const result = await profile.save();
+        return res.status(200).json(result);
+      }
+    }
+  
+    return res.status(400).json({ message: "Error with Update profile" });
 };

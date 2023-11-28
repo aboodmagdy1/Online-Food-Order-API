@@ -35,6 +35,7 @@
 #### Delivery Person 
   -  profile services 
   - update status (online , offline)
+  - update lanetude and latitude information
   
 
 
