@@ -16,7 +16,7 @@ import {
   GenerateSignature,
   validatePassword,
 } from "../utility";
-import { Customer, Food, Offer, Vendor } from "../models";
+import { Customer, DeliveryUser, Food, Offer, Vendor } from "../models";
 import { Order } from "../models";
 import { trace } from "console";
 import { Transaction } from "../models/TransactionModel";
@@ -380,7 +380,6 @@ export const CreatePayment = async (
 
   //perform payment geteway Charge Api call
 
-
   // Create record on transactions
   const transaction = await Transaction.create({
     customer: customer ? customer._id : null,
@@ -408,22 +407,35 @@ const validateTransaction = async (txnId: string) => {
 
 /**   --------------------- Delivery Notification  ----------------------    **/
 
+const assignOrderForDelivery = async (orderId: string, vendorId: string) => {
+  // find the vendor
+  const vendor = await Vendor.findById(vendorId);
 
-const assignOrderForDelivery = async (orderId :string, vendorId:string)=>{
+  if (vendor) {
+    const areaCode = vendor.pincode;
+    const vendorLat = vendor.lat;
+    const vendorLng = vendor.lng;
 
+    // find the available delivery person
+    const deliveryPerson = await DeliveryUser.find({
+      pincode: areaCode,
+      isAvailable: true,
+      verified: true,
+    });
 
-  // find the vendor 
-  const vendor = await Vendor.findById(orderId)
+    if (deliveryPerson.length>0) {
+      // check the nearst delivery person and assign order to it
+      // by api google maps ore any one
 
-  // find the available delivery person 
-
-
-
-  // check the nearst delivery person and assign order to tit 
-
-
-  // update DeliveryID
-}
+      const currentOrder = await Order.findById(orderId);
+      if (currentOrder) {
+        // update DeliveryID
+        currentOrder.deliveryId =  deliveryPerson[0]._id
+        const response = await currentOrder.save();
+      }
+    }
+  }
+};
 /**   --------------------- Orders ----------------------    **/
 
 //@desc create order
@@ -440,9 +452,7 @@ export const CreateOrder = async (
 
   if (customer) {
     //1) validate transaction
-    const { status, currentTransaction } = await validateTransaction(
-      txnId
-    );
+    const { status, currentTransaction } = await validateTransaction(txnId);
     if (!status) {
       return res.status(400).json({ message: "Error with creating order" });
     }
@@ -453,6 +463,7 @@ export const CreateOrder = async (
       //2) create order Id (1000 - 8999)
       const orderId = `${Math.floor(Math.random() * 8999) + 1000}`;
       //3) grab order item from rquest [{id:... , unit :..}]
+      const cart = <[CartItem]> req.body
       let cartItems = Array();
       let netAmount = 0.0;
       let vendorId;
@@ -477,34 +488,36 @@ export const CreateOrder = async (
         orderID: orderId,
         vendorID: vendorId,
         items: cartItems,
-        totalAmount: netAmount, // total without offers 
-        paidAmount:amount, // total amount after offers 
+        totalAmount: netAmount, // total without offers
+        paidAmount: amount, // total amount after offers
         orderDate: new Date(),
         orderStatus: "Waiting",
-        remarks: " ",
-        deliveryId: " ",
+        remarks: "",
+        deliveryId: "",
         readyTime: 45,
       });
 
       //6) after the order is created update the transaction
 
-      if (currentOrder) {
         profile.cart = [] as any;
         profile.orders.push(currentOrder);
 
         if (currentTransaction) {
-          currentTransaction.vendorId= currentOrder.vendorID
+          currentTransaction.vendorId = currentOrder.vendorID;
           currentTransaction.status = "CONFIRMED";
           currentTransaction.orderId = orderId; // دا رقم الاوردر وليس ال اي دي بتاع الاوردر
           await currentTransaction.save();
+
+
+          await assignOrderForDelivery(currentOrder._id, currentOrder.vendorID);
+          const profileResponse = await profile.save()
+
+  
+          return res.status(200).json(profileResponse);
         }
-        const responseProfile = await profile.save();
-        assignOrderForDelivery(currentOrder._id, currentOrder.vendorID)
-        
-        return res.status(200).json(responseProfile);
       }
     }
-  }
+  
 
   return res.status(400).json({ message: "Error Creating Order" });
 };

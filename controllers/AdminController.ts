@@ -1,8 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { CreateVendorInput } from "../dto";
-import { Delivery, Vendor } from "../models";
+import { DeliveryUser, Vendor } from "../models";
 import { GenerateSalt, GeneratePassword } from "../utility";
 import { Transaction } from "../models/TransactionModel";
+
+
+
+//----------------------------------Vendors -------------------
+
 
 // as a vactor to find Vendor with email or id in different cases 
 export const FindVendor = async (id:string | undefined ,email?:string)=>{
@@ -108,6 +113,7 @@ export const GetVendorById =async  (
 
 
 };
+//----------------------------------Transaction -------------------
 
 
 //@desc admin  transactions
@@ -168,7 +174,7 @@ export const VerifyDeliveryUser =async  (
   const {_id , status} = req.body
 
   if(_id){
-    const deliveryProfile = await Delivery.findById(_id)
+    const deliveryProfile = await DeliveryUser.findById(_id)
 
     if(deliveryProfile){
       deliveryProfile.verified = status
@@ -190,7 +196,7 @@ export const GetDeliveryUsers =async  (
   next: NextFunction
 ) => {
 
-    const deliveryUsers = await Delivery.find()
+    const deliveryUsers = await DeliveryUser.find()
     if(deliveryUsers){
       return res.json(deliveryUsers);
     }

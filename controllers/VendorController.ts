@@ -129,7 +129,7 @@ export const UpdateVendorService = async (
   if (user) {
     const existingVendor = await FindVendor(user._id);
     if (existingVendor !== null) {
-      existingVendor.serviceAvailable = !existingVendor.serviceAvailable;
+      existingVendor.serviceAvailable = !existingVendor.serviceAvailable; // toggle service availibilty 
       if(lat&& lng){
         existingVendor.lat = lat 
         existingVendor.lng = lng

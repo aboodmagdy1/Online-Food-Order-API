@@ -9,7 +9,7 @@ import {
   GenerateSignature,
   validatePassword,
 } from "../utility";
-import { Delivery } from "../models";
+import { DeliveryUser } from "../models";
 import {
   CreateDeliveryUserInputs,
   DeliveryLoginUserInputs,
@@ -42,14 +42,14 @@ export const DeliveryUserSignup = async (
   const deliveryPassword = await GeneratePassword(password, salt);
 
   //check if this user already exists
-  const existingDeliveryUser = await Delivery.findOne({ email: email });
+  const existingDeliveryUser = await DeliveryUser.findOne({ email: email });
   if (existingDeliveryUser) {
     return res
       .status(409)
       .json({ message: "An delivery user with this email already exists" });
   }
   // if not exist create one
-  const result = await Delivery.create({
+  const result = await DeliveryUser.create({
     email,
     password: deliveryPassword,
     salt,
@@ -105,7 +105,7 @@ export const DeliveryUserLogin = async (
   const { email, password } = deliverUserLoginInputs;
 
   //check if this user already exists with this email
-  const deliveryUser = await Delivery.findOne({ email: email });
+  const deliveryUser = await DeliveryUser.findOne({ email: email });
 
   if (deliveryUser) {
     //verify password
@@ -151,7 +151,7 @@ export const UpdateDeliveryUserStatus = async (
     if(deliveryUser){
         const {lat,lng} = req.body
 
-        const profile = await Delivery.findById(deliveryUser._id)
+        const profile = await DeliveryUser.findById(deliveryUser._id)
         if(profile){
 
             profile.lat = lat 
@@ -180,7 +180,7 @@ export const GetDeliveryUserProfile = async (
 ) => {
   const deliveryUser = req.user;
   if (deliveryUser) {
-    const deliveryProfile = await Delivery.findById(deliveryUser._id);
+    const deliveryProfile = await DeliveryUser.findById(deliveryUser._id);
 
     return res.status(200).json(deliveryProfile);
   }
@@ -208,7 +208,7 @@ export const UpdateDeliveryUserProfile = async (
     }
     const { fristName, lastName, address } = profileInputs;
     if (deliveryUser) {
-      const profile = await Delivery.findById(deliveryUser._id);
+      const profile = await DeliveryUser.findById(deliveryUser._id);
   
       if (profile) {
         profile.fristName = fristName;

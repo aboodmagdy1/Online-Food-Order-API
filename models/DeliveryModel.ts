@@ -46,4 +46,4 @@ const DeliverySchema = new Schema(
 );
 
 const DeliveryModel = mongoose.model<DeliveryDoc>("Delivery", DeliverySchema);
-export { DeliveryModel as Delivery };
+export { DeliveryModel as DeliveryUser };
