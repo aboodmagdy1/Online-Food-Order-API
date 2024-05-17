@@ -63,7 +63,7 @@
    - **For Customer** 
       - Create Order 
       - Get Order , Orders 
-   - **For Customer** 
+   - **For Vendor** 
       - Get Orders that requested by Customers to him  
       - Get specific order details
       - Process On Order like (status , remarks , readyTime)
